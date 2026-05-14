@@ -1,0 +1,14 @@
+# Example for Post 1: What is Docker Compose?
+# Run with: docker compose up
+# This shows the simplest possible compose file: two services, zero configuration headaches.
+
+services:
+  web:
+    image: nginx:alpine
+    # Expose nginx on port 8080 on your host
+    ports:
+      - "8080:80"
+
+  cache:
+    image: redis:alpine
+    # Redis is only reachable by other services in this compose project — not exposed to the host

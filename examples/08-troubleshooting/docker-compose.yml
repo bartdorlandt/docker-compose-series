@@ -1,0 +1,32 @@
+# Example for Post 8: Troubleshooting Common Issues
+# Run with: docker compose up
+# This example is intentionally annotated with common failure modes and their fixes.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  app:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    # Tip: use 'docker compose logs app' to see why a service fails to start
+    # Tip: use 'docker compose exec app sh' to get a shell inside a running container
+    # Tip: use 'docker compose down -v' to wipe volumes and start fresh
+
+volumes:
+  db-data:

@@ -1,0 +1,34 @@
+# Example for Post 10: Using include and extends
+# Run with: docker compose up
+#
+# 'include' pulls in a whole compose file — all its services, volumes, and networks
+# 'extends' inherits a single service definition and lets you override specific fields
+
+include:
+  # Merges all services and volumes from base.yml into this project
+  - base.yml
+
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  # 'extends' inherits the 'db' service from base.yml and lets you override specific fields
+  db-replica:
+    extends:
+      file: base.yml
+      service: db
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      # Different database name to simulate a replica
+      POSTGRES_DB: demo_replica
+    # Explicitly replace the inherited volumes list to avoid two volumes mounting at the same path
+    volumes:
+      - db-replica-data:/var/lib/postgresql/data
+
+volumes:
+  db-replica-data:

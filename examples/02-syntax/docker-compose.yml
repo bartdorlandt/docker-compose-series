@@ -1,0 +1,41 @@
+# Example for Post 2: Docker Compose File Structure and Syntax
+# Run with: docker compose up
+# This file is a living reference: every major top-level key is shown and explained.
+
+# The compose spec version is inferred automatically — no need to declare it.
+
+services:
+  db:
+    image: postgres:16-alpine
+    # Environment variables configure the postgres instance
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo
+    # Named volume keeps data between restarts
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # Restart the container if it exits unexpectedly
+    restart: unless-stopped
+    networks:
+      - frontend
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    # This service won't start until db is running (basic dependency — no health check)
+    depends_on:
+      - db
+    # Connect both services to a custom network — they can reach each other by service name
+    networks:
+      - frontend
+
+networks:
+  # Defining a network explicitly gives you control over its driver and options
+  frontend:
+    driver: bridge
+
+volumes:
+  # Named volumes are managed by Docker and persist across `docker compose down`
+  db-data:

@@ -1,0 +1,32 @@
+# Example for Post 4: Healthchecks and Service Dependencies
+# Run with: docker compose up
+# The 'app' service won't start until postgres passes its health check.
+# This prevents connection-refused errors on startup.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo
+    healthcheck:
+      # pg_isready checks whether postgres is accepting connections
+      test: ["CMD-SHELL", "pg_isready -U demo -d demo"]
+      # Wait 5s between checks
+      interval: 5s
+      # Fail a check if it takes longer than 5s
+      timeout: 5s
+      # Mark unhealthy after 5 consecutive failures
+      retries: 5
+      # Give postgres 10s to start before health checks begin
+      start_period: 10s
+
+  app:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        # 'service_healthy' waits for the healthcheck above to pass — not just the container to start
+        condition: service_healthy

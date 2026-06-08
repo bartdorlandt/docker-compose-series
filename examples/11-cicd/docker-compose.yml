@@ -1,0 +1,30 @@
+# Example for Post 11: Integrating with CI/CD
+# Local dev: docker compose up
+# CI:        docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo
+    volumes:
+      # Named volume keeps data between local restarts
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

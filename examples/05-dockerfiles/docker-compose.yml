@@ -1,0 +1,12 @@
+# Example for Post 5: Using Docker Compose with Dockerfiles
+# Run with: docker compose up --build
+# Instead of pulling a pre-built image, compose builds one from our Dockerfile.
+
+services:
+  web:
+    # 'build: .' tells compose to build an image from the Dockerfile in the current directory
+    build: .
+    ports:
+      - "8080:80"
+    # Without 'image:', compose names the built image automatically
+    # Add 'image: my-web:latest' to give it an explicit tag

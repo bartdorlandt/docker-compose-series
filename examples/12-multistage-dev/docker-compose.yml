@@ -1,0 +1,25 @@
+# Example for Post 12: Multi-stage Dockerfiles + Dev Workflows (Go + dlv)
+# Dev mode:  docker compose up app-dev
+# Prod mode: docker compose up app-prod
+# Attach debugger: dlv connect localhost:2345
+
+services:
+  app-dev:
+    build:
+      context: .
+      # Build only the 'dev' stage — includes Delve
+      target: dev
+    ports:
+      - "8080:8080"
+      # Expose dlv on port 2345 so you can connect from your IDE or CLI
+      - "2345:2345"
+    # Note: no volume mount here — mounting the host directory would shadow the compiled binary
+    # built inside the image. To pick up code changes, rebuild with: docker compose build app-dev
+
+  app-prod:
+    build:
+      context: .
+      # Build the 'prod' stage — minimal image, no debug tools
+      target: prod
+    ports:
+      - "8081:8080"

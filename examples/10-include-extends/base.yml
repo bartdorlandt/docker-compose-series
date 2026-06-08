@@ -1,0 +1,16 @@
+# base.yml — shared service definitions reused via 'include' or 'extends'
+# This file is not a standalone compose file — it's a building block.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  db-data:

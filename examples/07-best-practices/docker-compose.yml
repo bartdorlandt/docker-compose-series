@@ -1,0 +1,40 @@
+# Example for Post 7: Best Practices
+# Run with: docker compose up
+# Demonstrates: env_file, named volumes, restart policy, resource limits, read-only filesystem
+
+services:
+  db:
+    image: postgres:16-alpine
+    # Load env vars from .env file — keeps secrets out of docker-compose.yml
+    env_file: .env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 256M
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+    # Run nginx with a read-only root filesystem for security
+    read_only: true
+    # nginx needs to write to these paths even with a read-only root
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 64M
+
+volumes:
+  db-data:

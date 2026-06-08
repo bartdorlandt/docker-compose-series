@@ -1,0 +1,26 @@
+# Example for Post 3: Running a Multi-Container Application
+# Run with: docker compose up
+# nginx proxies to a simple HTTP backend. Services communicate by name on the internal network.
+
+services:
+  proxy:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    # Mount our custom nginx config over the default one
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+
+  backend:
+    # nginx acting as a mock backend — returns a static response
+    image: nginx:alpine
+    # expose is documentation-only — it does not restrict access between containers.
+    # Services on the same compose network can reach each other on any port.
+    # The key point: this port is NOT mapped to your host (no 'ports:' key).
+    expose:
+      - "8080"
+    # Override default config to listen on 8080
+    command: >
+      sh -c "echo 'server { listen 8080; location / { return 200 \"Hello from backend\\n\"; add_header Content-Type text/plain; } }' > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"

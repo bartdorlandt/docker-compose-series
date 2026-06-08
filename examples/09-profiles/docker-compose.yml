@@ -1,0 +1,43 @@
+# Example for Post 9: Using Profiles
+# Run default services only:  docker compose up
+# Run with debug tools:       docker compose --profile debug up
+# Run with admin tools:       docker compose --profile tools up
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo
+    # No profile = always started
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    # No profile = always started
+
+  debugger:
+    # Only started when --profile debug is passed
+    profiles: [debug]
+    image: nicolaka/netshoot
+    # netshoot is a network troubleshooting toolkit — useful to diagnose connectivity issues
+    command: sleep infinity
+    network_mode: service:web
+
+  adminer:
+    # Only started when --profile tools is passed
+    profiles: [tools]
+    image: adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+volumes:
+  db-data:

@@ -1,0 +1,28 @@
+# Example for Post 6: Managing and Scaling Services
+# Run with: docker compose up
+# deploy.replicas sets the default count (3 here).
+# Override at runtime with: docker compose up --scale worker=5
+
+services:
+  proxy:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      - worker
+
+  worker:
+    image: nginx:alpine
+    # No host port binding here — multiple replicas can't all bind the same host port.
+    # Docker's internal DNS resolves 'worker' to all replica IPs and round-robins requests.
+    # To see this, exec into the proxy and run: curl worker
+    expose:
+      - "80"
+    deploy:
+      # Default replica count — override with: docker compose up --scale worker=5
+      replicas: 3
+      resources:
+        limits:
+          # Cap each replica at 0.5 CPU and 64MB RAM
+          cpus: "0.5"
+          memory: 64M

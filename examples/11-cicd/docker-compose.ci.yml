@@ -1,0 +1,28 @@
+# CI override file for Post 11: CI/CD Integration
+# Merged on top of docker-compose.yml in CI environments.
+# Removes persistent volumes and tunes settings for ephemeral CI runners.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
+
+services:
+  db:
+    # Override: use an in-memory tmpfs instead of a named volume — faster in CI, no cleanup needed
+    # Use a volume with tmpfs driver to avoid mount conflicts with the base named volume
+    volumes:
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: ci
+      POSTGRES_DB: ci_test
+    # Override healthcheck to match the CI user credentials
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ci"]
+
+  web:
+    environment:
+      # Signal to the app that it's running in CI
+      APP_ENV: ci
+
+# Remove the named volume declaration — not needed in CI
+volumes:
+  db-data: null

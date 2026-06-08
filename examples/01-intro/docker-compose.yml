@@ -1,6 +1,5 @@
 # Example for Post 1: What is Docker Compose?
 # Run with: docker compose up
-# This shows the simplest possible compose file: two services, zero configuration headaches.
 
 services:
   web:
